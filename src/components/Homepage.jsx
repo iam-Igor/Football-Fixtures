@@ -6,17 +6,31 @@ import {
   Form,
   Accordion,
   ListGroup,
+  Tabs,
+  Tab,
 } from "react-bootstrap";
 import format from "date-fns/format";
 
 import Sidebar from "./Sidebar";
+import { useDispatch, useSelector } from "react-redux";
+import { SERIE_A, PREMIER_UK, LIGA_ES } from "../redux/store/store";
 
 const Homepage = () => {
-  const [serieA, setSerieA] = useState(null);
+  const dispatch = useDispatch();
+
+  const serieA = useSelector((state) => state.serieA);
+  const premierL = useSelector((state) => state.premierLeague);
+  const laLigaEs = useSelector((state) => state.laLiga);
+
+  console.log(serieA);
+
+  const laLiga = "soccer_spain_la_liga";
+  const premierLeague = "soccer_epl";
+  const serieAEndpoint = "soccer_italy_serie_a";
 
   const getFixtures = () => {
     fetch(
-      "https://odds.p.rapidapi.com/v4/sports/soccer_italy_serie_a/scores",
+      "https://odds.p.rapidapi.com/v4/sports/" + serieAEndpoint + "/scores",
 
       {
         method: "GET",
@@ -36,9 +50,10 @@ const Homepage = () => {
         }
       })
       .then((data) => {
+        dispatch({ type: SERIE_A, payload: data });
         console.log(data);
-        setSerieA(data);
       })
+
       .catch((err) => {
         console.log(err);
       });
@@ -51,7 +66,7 @@ const Homepage = () => {
   return (
     <Container>
       <Row className="justify-content-between">
-        <Sidebar serieA={serieA} />
+        <Sidebar serieA={serieA[0]} />
         <Col className="mt-5 col-md-8 d-none d-md-block ms-3">
           <Row className="flex-column">
             <Col className="d-flex flex-column align-items-end col-12">
@@ -66,35 +81,17 @@ const Homepage = () => {
               </ul>
             </Col>
             <p className="fw-bold fs-4">Featured Football Matches</p>
-
-            <Col className="bg-white rounded-4 p-4 d-flex my-4">
-              <div className="sidebar w-75 rounded-4 p-3">
-                <div className="d-flex">
-                  <p className="fw-bold">team 1</p>
-                  <p>VS</p>
-                  <p className="fw-bold">team2</p>
-                </div>
-                <p>sat 24 20.45</p>
-              </div>
-              <div className="w-25">
-                <img
-                  src="https://png.pngtree.com/png-clipart/20230527/original/pngtree-the-great-save-by-goalkeeper-emi-martinez-png-image_9171858.png"
-                  style={{ width: "100%", zIndex: "2" }}
-                  alt="soccer"
-                />
-              </div>
-            </Col>
-
-            {serieA && (
-              <Accordion className="p-0">
-                <Accordion.Item eventKey="0" className="rounded-4">
-                  <Accordion.Header>
-                    All Serie A incoming matches
-                  </Accordion.Header>
-                  <Accordion.Body>
+            {serieA[0] && (
+              <Col>
+                <Tabs
+                  defaultActiveKey="profile"
+                  id="uncontrolled-tab-example"
+                  className="mb-3"
+                >
+                  <Tab eventKey="home" title="Serie A">
                     <div className="sidebar w-100 rounded-4 p-3">
                       <ListGroup>
-                        {serieA.map((game, index) => {
+                        {serieA[0].slice(0, 10).map((game, index) => {
                           const startDate = game.commence_time;
                           const formattedDate = format(
                             new Date(startDate),
@@ -109,9 +106,15 @@ const Homepage = () => {
                         })}
                       </ListGroup>
                     </div>
-                  </Accordion.Body>
-                </Accordion.Item>
-              </Accordion>
+                  </Tab>
+                  <Tab eventKey="profile" title="Profile">
+                    Tab content for Profile
+                  </Tab>
+                  <Tab eventKey="contact" title="Contact">
+                    Tab content for Contact
+                  </Tab>
+                </Tabs>
+              </Col>
             )}
 
             <p className="fw-bold fs-4">Other Leagues</p>
