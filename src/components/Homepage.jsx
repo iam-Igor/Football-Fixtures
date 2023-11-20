@@ -1,7 +1,19 @@
-import { useEffect } from "react";
-import { Col, Container, Row, Form } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import {
+  Col,
+  Container,
+  Row,
+  Form,
+  Accordion,
+  ListGroup,
+} from "react-bootstrap";
+import format from "date-fns/format";
+
+import Sidebar from "./Sidebar";
 
 const Homepage = () => {
+  const [serieA, setSerieA] = useState(null);
+
   const getFixtures = () => {
     fetch(
       "https://odds.p.rapidapi.com/v4/sports/soccer_italy_serie_a/scores",
@@ -25,88 +37,21 @@ const Homepage = () => {
       })
       .then((data) => {
         console.log(data);
+        setSerieA(data);
       })
       .catch((err) => {
         console.log(err);
       });
   };
 
-  //   useEffect(() => {
-  //     getFixtures();
-  //   }, []);
+  useEffect(() => {
+    getFixtures();
+  }, []);
 
   return (
     <Container>
-      <Row>
-        <Col className="col-12 col-md-3 p-4 bg-white mt-5 rounded-5">
-          <p className="fw-bold">Live data</p>
-          <Row className="flex-column sidebar p-4 rounded-4">
-            <Col>
-              <Form>
-                <Col>
-                  <Form.Control
-                    type="text"
-                    placeholder="Search events"
-                    className="rounded-5"
-                  />
-                </Col>
-              </Form>
-            </Col>
-            <Col className="d-flex justify-content-around mt-5">
-              <div className="bg-white p-2 rounded-4">
-                <img
-                  width="45"
-                  height="45"
-                  src="https://img.icons8.com/ios-filled/50/football.png"
-                  alt="football"
-                />
-                <p className="m-0">Football</p>
-              </div>
-              <div className="bg-white p-2 rounded-4">
-                <img
-                  width="45"
-                  height="45"
-                  src="https://img.icons8.com/ios-filled/50/tennis-2.png"
-                  alt="tennis-2"
-                />
-                <p className="m-0">Tennis</p>
-              </div>
-              <div className="bg-white p-2 rounded-4">
-                <img
-                  width="45"
-                  height="45"
-                  src="https://img.icons8.com/ios-filled/50/basketball-2.png"
-                  alt="basketball-2"
-                />
-                <p className="m-0">Basket</p>
-              </div>
-            </Col>
-          </Row>
-          <Row className="flex-column">
-            <p className="fw-bold">Incoming Matches</p>
-            <Col className="border rounded-4 my-3">
-              <p>sat 24 20.45</p>
-              <div>
-                <p>team 1</p>
-                <p>team2</p>
-              </div>
-            </Col>
-            <Col className="border rounded-4">
-              <p>sat 24 20.45</p>
-              <div>
-                <p>team 1</p>
-                <p>team2</p>
-              </div>
-            </Col>
-            <Col className="border rounded-4 my-3">
-              <p>sat 24 20.45</p>
-              <div>
-                <p>team 1</p>
-                <p>team2</p>
-              </div>
-            </Col>
-          </Row>
-        </Col>
+      <Row className="justify-content-between">
+        <Sidebar serieA={serieA} />
         <Col className="mt-5 col-md-8 d-none d-md-block ms-3">
           <Row className="flex-column">
             <Col className="d-flex flex-column align-items-end col-12">
@@ -121,23 +66,7 @@ const Homepage = () => {
               </ul>
             </Col>
             <p className="fw-bold fs-4">Featured Football Matches</p>
-            <Col className="bg-white rounded-4 p-4 d-flex">
-              <div className="sidebar w-75 rounded-4 p-3">
-                <div className="d-flex">
-                  <p className="fw-bold">team 1</p>
-                  <p>VS</p>
-                  <p className="fw-bold">team2</p>
-                </div>
-                <p>sat 24 20.45</p>
-              </div>
-              <div className="w-25">
-                <img
-                  src="https://png.pngtree.com/png-clipart/20230527/original/pngtree-the-great-save-by-goalkeeper-emi-martinez-png-image_9171858.png"
-                  style={{ width: "100%", zIndex: "2" }}
-                  alt="soccer"
-                />
-              </div>
-            </Col>
+
             <Col className="bg-white rounded-4 p-4 d-flex my-4">
               <div className="sidebar w-75 rounded-4 p-3">
                 <div className="d-flex">
@@ -155,6 +84,36 @@ const Homepage = () => {
                 />
               </div>
             </Col>
+
+            {serieA && (
+              <Accordion className="p-0">
+                <Accordion.Item eventKey="0" className="rounded-4">
+                  <Accordion.Header>
+                    All Serie A incoming matches
+                  </Accordion.Header>
+                  <Accordion.Body>
+                    <div className="sidebar w-100 rounded-4 p-3">
+                      <ListGroup>
+                        {serieA.map((game, index) => {
+                          const startDate = game.commence_time;
+                          const formattedDate = format(
+                            new Date(startDate),
+                            "dd/MM HH:mm"
+                          );
+                          return (
+                            <ListGroup.Item key={index} className="text-center">
+                              {game.home_team} vs {game.away_team} |{" "}
+                              {formattedDate}
+                            </ListGroup.Item>
+                          );
+                        })}
+                      </ListGroup>
+                    </div>
+                  </Accordion.Body>
+                </Accordion.Item>
+              </Accordion>
+            )}
+
             <p className="fw-bold fs-4">Other Leagues</p>
             <Col className="rounded-4 p-4 d-flex justify-content-around">
               <div className="bg-white rounded-5 d-flex align-items-center justify-content-center">
