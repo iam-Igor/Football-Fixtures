@@ -1,7 +1,45 @@
 import { Col, Row, Form } from "react-bootstrap";
 import format from "date-fns/format";
+import { useEffect, useState } from "react";
 
-const Sidebar = ({ serieA }) => {
+const Sidebar = () => {
+  const [leagueData, setLeagueData] = useState([]);
+
+  const getAllFixtures = (param) => {
+    fetch(
+      "https://odds.p.rapidapi.com/v4/sports/" + param + "/scores",
+
+      {
+        method: "GET",
+        headers: {
+          "X-RapidAPI-Key":
+            "146b3484dfmsh6a74755abd8268bp1e6739jsnaa8d50dd6aae",
+          "X-RapidAPI-Host": "odds.p.rapidapi.com",
+        },
+      }
+    )
+      .then((res) => {
+        if (res.ok) {
+          console.log("res ok!");
+          return res.json();
+        } else {
+          throw new Error();
+        }
+      })
+      .then((data) => {
+        console.log(data, "select data");
+        setLeagueData(data);
+      })
+
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  useEffect(() => {
+    getAllFixtures("soccer_italy_serie_a");
+  }, []);
+
   return (
     <Col className="col-12 col-md-3 p-4 bg-white mt-5 rounded-5">
       <p className="fw-bold">Live data</p>
@@ -47,23 +85,54 @@ const Sidebar = ({ serieA }) => {
           </div>
         </Col>
       </Row>
-      {serieA && (
-        <Row className="flex-column ">
-          <p className="fw-bold mt-3">Incoming Matches for Serie A</p>
-          {serieA.slice(0, 3).map((game, index) => {
+      {leagueData && (
+        <Row className="flex-column">
+          <p className="fw-bold mt-3 text-center">Choose league</p>
+          <Form.Select
+            aria-label="Default select example"
+            onChange={(e) => {
+              getAllFixtures(e.target.value);
+            }}
+          >
+            <option value="soccer_italy_serie_a">Serie A</option>
+            <option value="soccer_italy_serie_b">Serie B</option>
+            <option value="soccer_epl">Premier League</option>
+            <option value="soccer_england_league1">Ligue One UK</option>
+            <option value="soccer_spain_la_liga">La Liga ES</option>
+            <option value="soccer_spain_segunda_division">
+              Segunda Liga ES
+            </option>
+            <option value="soccer_germany_bundesliga">Bundesliga</option>
+            <option value="soccer_germany_bundesliga2">Bundesliga 2</option>
+            <option value="soccer_france_ligue_one">Ligue 1 FR</option>
+            <option value="soccer_france_ligue_two">Ligue 2 FR</option>
+            <option value="soccer_uefa_champs_league">
+              Uefa Champions League
+            </option>
+            <option value="soccer_uefa_europa_league">
+              Uefa Europa League
+            </option>
+            <option value="soccer_uefa_europa_conference_league">
+              Uefa conference League
+            </option>
+          </Form.Select>
+          {leagueData.slice(0, 10).map((game, index) => {
             const startDate = game.commence_time;
-            const formattedDate = format(new Date(startDate), "dd/MM HH:mm");
+            const formattedDate = format(new Date(startDate), "dd/MM");
+            const formattedTime = format(new Date(startDate), "HH:mm");
 
             return (
               <Col
                 key={index}
-                className="border rounded-4 my-3 p-2 d-flex sidebar"
+                className="border rounded-4 my-3 p-2 d-flex sidebar align-items-center"
               >
+                <div className="fw-bold me-2">
+                  <p className="m-0">{formattedDate}</p>
+                  <p className="m-0">{formattedTime}</p>
+                </div>
                 <div>
-                  <p>{formattedDate}</p>
-
-                  <p>{game.home_team}</p>
-                  <p>{game.away_team}</p>
+                  <p className="m-0">{game.home_team}</p>
+                  <p className="m-0">{game.away_team}</p>
                 </div>
                 <div>results</div>
               </Col>
