@@ -19,16 +19,16 @@ const Homepage = () => {
   const dispatch = useDispatch();
 
   const serieA = useSelector((state) => state.serieA);
-  const premierL = useSelector((state) => state.premierLeague);
+  const premierL = useSelector((state) => state.premierleague);
   const laLigaEs = useSelector((state) => state.laLiga);
 
-  console.log(serieA);
+  console.log(premierL);
 
   const laLiga = "soccer_spain_la_liga";
   const premierLeague = "soccer_epl";
   const serieAEndpoint = "soccer_italy_serie_a";
 
-  const getFixtures = () => {
+  const getSerieAFixtures = () => {
     fetch(
       "https://odds.p.rapidapi.com/v4/sports/" + serieAEndpoint + "/scores",
 
@@ -59,8 +59,72 @@ const Homepage = () => {
       });
   };
 
+  const getPremierFixtures = () => {
+    fetch(
+      "https://odds.p.rapidapi.com/v4/sports/" + premierLeague + "/scores",
+
+      {
+        method: "GET",
+        headers: {
+          "X-RapidAPI-Key":
+            "146b3484dfmsh6a74755abd8268bp1e6739jsnaa8d50dd6aae",
+          "X-RapidAPI-Host": "odds.p.rapidapi.com",
+        },
+      }
+    )
+      .then((res) => {
+        if (res.ok) {
+          console.log("res ok!");
+          return res.json();
+        } else {
+          throw new Error();
+        }
+      })
+      .then((data) => {
+        dispatch({ type: PREMIER_UK, payload: data });
+        console.log(data, "premier");
+      })
+
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const getlaLigaFixtures = () => {
+    fetch(
+      "https://odds.p.rapidapi.com/v4/sports/" + laLiga + "/scores",
+
+      {
+        method: "GET",
+        headers: {
+          "X-RapidAPI-Key":
+            "146b3484dfmsh6a74755abd8268bp1e6739jsnaa8d50dd6aae",
+          "X-RapidAPI-Host": "odds.p.rapidapi.com",
+        },
+      }
+    )
+      .then((res) => {
+        if (res.ok) {
+          console.log("res ok!");
+          return res.json();
+        } else {
+          throw new Error();
+        }
+      })
+      .then((data) => {
+        dispatch({ type: LIGA_ES, payload: data });
+        console.log(data, "premier");
+      })
+
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   useEffect(() => {
-    getFixtures();
+    getSerieAFixtures();
+    getPremierFixtures();
+    getlaLigaFixtures();
   }, []);
 
   return (
@@ -107,11 +171,53 @@ const Homepage = () => {
                       </ListGroup>
                     </div>
                   </Tab>
-                  <Tab eventKey="profile" title="Profile">
-                    Tab content for Profile
+                  <Tab eventKey="profile" title="Premier League">
+                    <div className="sidebar w-100 rounded-4 p-3">
+                      {premierL && (
+                        <ListGroup>
+                          {premierL[0].slice(0, 10).map((game, index) => {
+                            const startDate = game.commence_time;
+                            const formattedDate = format(
+                              new Date(startDate),
+                              "dd/MM HH:mm"
+                            );
+                            return (
+                              <ListGroup.Item
+                                key={index}
+                                className="text-center"
+                              >
+                                {game.home_team} vs {game.away_team} |{" "}
+                                {formattedDate}
+                              </ListGroup.Item>
+                            );
+                          })}
+                        </ListGroup>
+                      )}
+                    </div>
                   </Tab>
-                  <Tab eventKey="contact" title="Contact">
-                    Tab content for Contact
+                  <Tab eventKey="contact" title="La Liga">
+                    <div className="sidebar w-100 rounded-4 p-3">
+                      {laLigaEs && (
+                        <ListGroup>
+                          {laLigaEs[0].slice(0, 10).map((game, index) => {
+                            const startDate = game.commence_time;
+                            const formattedDate = format(
+                              new Date(startDate),
+                              "dd/MM HH:mm"
+                            );
+                            return (
+                              <ListGroup.Item
+                                key={index}
+                                className="text-center"
+                              >
+                                {game.home_team} vs {game.away_team} |{" "}
+                                {formattedDate}
+                              </ListGroup.Item>
+                            );
+                          })}
+                        </ListGroup>
+                      )}
+                    </div>
                   </Tab>
                 </Tabs>
               </Col>
