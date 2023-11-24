@@ -13,7 +13,7 @@ const Sidebar = () => {
         method: "GET",
         headers: {
           "X-RapidAPI-Key":
-            "146b3484dfmsh6a74755abd8268bp1e6739jsnaa8d50dd6aae",
+            "",
           "X-RapidAPI-Host": "odds.p.rapidapi.com",
         },
       }
